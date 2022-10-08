@@ -80,8 +80,34 @@ class MyPromise {
         })
     }
 
+    static any(promises) {
+        return new MyPromise((resolve, reject) => {
+            let count = 0,
+                len = promises.length,
+                err = [];
+            for (let promise of promises) {
+                MyPromise.resolve(promise).then(resolve, e => {
+                    count++;
+                    err.push(e);
+                    if (count === len) {
+                        reject(err)
+                    }
+                })
+            }
+        })
+    }
+
     catch(onRejected) {
-        return this.then(void 666, onRejected)
+        return this.then(null, onRejected)
+    }
+
+    finally(onFinally) {
+        return this.then(
+            value => MyPromise.resolve(onFinally()).then(() => value),
+            err => MyPromise.resolve(onFinally()).then(() => {
+                throw err
+            })
+        )
     }
 
     then(onResolved, onRejected) { // 添加两个监听函数
